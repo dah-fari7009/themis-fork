@@ -7,6 +7,7 @@ OUTPUT_DIR=$4
 TEST_TIME=$5 # e.g., 10s, 10m, 10h
 HEADLESS=$6 # e.g., -no-window
 LOGIN_SCRIPT=$7 # the script for app login via uiautomator2
+INDEX=$8
 
 QTESTING_TOOL=../tools/Q-testing
 
@@ -36,7 +37,7 @@ do
     sleep 5
     # start the emulator
     avd_port=${AVD_SERIAL:9:13}
-    emulator -port $avd_port -avd $AVD_NAME -read-only $HEADLESS &
+    emulator -port $avd_port -avd $AVD_NAME -wipe-data -read-only $HEADLESS &
     sleep 5
     # wait for the emulator
     wait_for_device $AVD_SERIAL
@@ -89,7 +90,7 @@ fi
 sleep 10
 
 # get app package
-app_package_name=`aapt dump badging $APK_FILE | grep package | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
+app_package_name=`aapt dump badging $APK_FILE | grep package: | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
 echo "** PROCESSING APP (${AVD_SERIAL}): " $app_package_name
 
 ### create config file before running qtesting
@@ -113,6 +114,7 @@ echo "" >> $config_file
 echo "[Setting]" >> $config_file
 echo "DEVICE_ID = ${AVD_SERIAL}" >> $config_file
 echo "TIME_LIMIT = 21600" >> $config_file
+echo "TEST_INDEX = ${INDEX}" >> $config_file
 
 # delete the old output dir if exists
 rm -rf ${real_path_of_qtesting}/subjects/"${AVD_SERIAL}*"
@@ -132,7 +134,8 @@ echo "** RUN Q-testing (${AVD_SERIAL})"
 adb -s $AVD_SERIAL shell date "+%Y-%m-%d-%H:%M:%S" >> $result_dir/qtesting_testing_time_on_emulator.txt
 cd ${QTESTING_TOOL} || exit
 config_file_name=`basename $config_file`
-timeout $TEST_TIME ./Q-testing/main -r $config_file_name > $result_dir/q-testing.log 2>&1 # ensure the program can normally exit
+pwd
+timeout $TEST_TIME ./main -r $config_file_name > $result_dir/q-testing.log 2>&1 # ensure the program can normally exit
 # add an additional package: -p com.android.camera
 adb -s $AVD_SERIAL shell date "+%Y-%m-%d-%H:%M:%S" >> $result_dir/qtesting_testing_time_on_emulator.txt
 

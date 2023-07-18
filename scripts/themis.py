@@ -111,12 +111,12 @@ def run_sapienz(apk, avd_serial, avd_name, output_dir, testing_time, screen_opti
     os.system(command)
 
 
-def run_qtesting(apk, avd_serial, avd_name, output_dir, testing_time, screen_option, login_script):
-    command = 'bash -x run_qtesting.sh %s %s %s %s %s %s %s' % (os.path.abspath(apk), avd_serial, avd_name,
+def run_qtesting(apk, avd_serial, avd_name, output_dir, testing_time, screen_option, login_script, offset):
+    command = 'bash -x run_qtesting.sh %s %s %s %s %s %s %s %s' % (os.path.abspath(apk), avd_serial, avd_name,
                                                                 os.path.abspath(output_dir),
                                                                 testing_time,
                                                                 screen_option,
-                                                                login_script)
+                                                                login_script, offset)
     print('execute Q-testing: %s' % command)
     os.system(command)
 
@@ -238,7 +238,7 @@ def main(args: Namespace):
             elif args.qtesting:
                 p.apply_async(run_qtesting, args=(current_apk, avd_serial, args.avd_name,
                                                   args.o, args.time, screen_option,
-                                                  login_script,))
+                                                  login_script,args.offset))
             else:
                 pass
 

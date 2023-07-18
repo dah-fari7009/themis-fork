@@ -37,7 +37,7 @@ do
     sleep 5
     # start the emulator
     avd_port=${AVD_SERIAL:9:13}
-    emulator -port $avd_port -avd $AVD_NAME -read-only $HEADLESS &
+    emulator -port $avd_port -avd $AVD_NAME -wipe-data -read-only $HEADLESS &
     sleep 5
     # wait for the emulator
     wait_for_device $AVD_SERIAL
@@ -81,7 +81,7 @@ fi
 sleep 2
 
 # get app package
-app_package_name=`aapt dump badging $APK_FILE | grep package | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
+app_package_name=`aapt dump badging $APK_FILE | grep package: | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
 echo "** PROCESSING APP (${AVD_SERIAL}): " $app_package_name
 
 ### create config file before running combodroid
@@ -96,8 +96,8 @@ echo "apk-name = ${unique_apk_file_name}" >> $config_file
 echo "instrument-output-dir = temp" >> $config_file
 android_home=`printenv ANDROID_HOME`
 echo "androidSDK-dir = ${android_home}" >> $config_file
-echo "android-platform-version = 30" >> $config_file
-echo "android-buildtool-version = 30.0.3" >> $config_file
+echo "android-platform-version = 33" >> $config_file
+echo "android-buildtool-version = 33.0.1" >> $config_file
 real_path_of_combo=`realpath $COMBO_DIR`
 echo "keystore-path = ${real_path_of_combo}/testKeyStore.jks" >> $config_file
 echo "key-alias = combodroid" >> $config_file

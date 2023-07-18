@@ -93,7 +93,7 @@ adb -s $AVD_SERIAL push $FASTBOT_TOOL/framework.jar /sdcard
 echo "** INSTALL Fastbot (${AVD_SERIAL})"
 
 # get app package
-app_package_name=`aapt dump badging $APK_FILE | grep package | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
+app_package_name=`aapt dump badging $APK_FILE | : | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
 echo "** PROCESSING APP (${AVD_SERIAL}): " $app_package_name
 
 # start logcat

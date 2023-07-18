@@ -309,7 +309,7 @@ def get_apk_info(testing_result_dir: str, app_name: str):
     target_apk_file_name = str(base_name.split(".apk")[0]) + ".apk"
 
     target_apk_file_path = os.path.join("../" + app_name, target_apk_file_name)
-    get_app_package_name_cmd = "aapt dump badging " + target_apk_file_path + " | grep package | awk '{print $2}' | sed s/name=//g | sed s/\\'//g"
+    get_app_package_name_cmd = "aapt dump badging " + target_apk_file_path + " | grep package: | awk '{print $2}' | sed s/name=//g | sed s/\\'//g"
     app_package_name = ""
 
     try:

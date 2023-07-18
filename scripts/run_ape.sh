@@ -36,7 +36,7 @@ do
     sleep 5
     # start the emulator
     avd_port=${AVD_SERIAL:9:13}
-    emulator -port $avd_port -avd $AVD_NAME -read-only $HEADLESS &
+    emulator -port $avd_port -avd $AVD_NAME -wipe-data -read-only $HEADLESS &
     sleep 5
     # wait for the emulator
     wait_for_device $AVD_SERIAL
@@ -93,7 +93,7 @@ adb -s $AVD_SERIAL push $APE_TOOL/ape.jar /data/local/tmp/
 echo "** INSTALL Ape (${AVD_SERIAL})"
 
 # get app package
-app_package_name=`aapt dump badging $APK_FILE | grep package | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
+app_package_name=`aapt dump badging $APK_FILE | grep package: | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
 echo "** PROCESSING APP (${AVD_SERIAL}): " $app_package_name
 
 # start logcat
@@ -109,6 +109,10 @@ bash dump_coverage.sh $AVD_SERIAL $app_package_name $result_dir &
 echo "** RUN APE (${AVD_SERIAL})"
 adb -s $AVD_SERIAL shell date "+%Y-%m-%d-%H:%M:%S" >> $result_dir/ape_testing_time_on_emulator.txt
 timeout $TEST_TIME adb -s $AVD_SERIAL shell CLASSPATH=/data/local/tmp/ape.jar /system/bin/app_process /data/local/tmp/ com.android.commands.monkey.Monkey -p $app_package_name --running-minutes 360 --ape sata 2>&1 | tee $result_dir/ape.log
+
+#timeout $TEST_TIME python3 $APE_TOOL/ape.py -s $AVD_SERIAL -p $app_package_name --running-minutes 360 --ape sata 2>&1 | tee $result_dir/ape.log
+
+
 # add an additional package name: "-p com.android.camera" 
 #timeout $TEST_TIME adb -s $AVD_SERIAL shell CLASSPATH=/data/local/tmp/ape.jar /system/bin/app_process /data/local/tmp/ com.android.commands.monkey.Monkey -p $app_package_name -p com.android.camera --running-minutes 360 --ape sata 2>&1 | tee $result_dir/ape.log 
 adb -s $AVD_SERIAL shell date "+%Y-%m-%d-%H:%M:%S" >> $result_dir/ape_testing_time_on_emulator.txt
