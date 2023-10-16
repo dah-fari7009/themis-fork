@@ -8,7 +8,7 @@ TEST_TIME=$5 # e.g., 10s, 10m, 10h
 HEADLESS=$6 # e.g., -no-window
 LOGIN_SCRIPT=$7 # the script for app login via uiautomator2
 
-FASTBOT-TOOL=../tools/fastbot-bin
+FASTBOT_TOOL=../tools/Fastbot_Android #fastbot-bin
 
 # wait for the target device
 function wait_for_device(){
@@ -87,13 +87,27 @@ fi
 
 sleep 20
 # install Fastbot
-adb -s $AVD_SERIAL push $FASTBOT_TOOL/monkeyq.jar /sdcard
-adb -s $AVD_SERIAL push $FASTBOT_TOOL/framework.jar /sdcard
+adb -s $AVD_SERIAL push $FASTBOT_TOOL/monkeyq.jar sdcard
+adb -s $AVD_SERIAL push $FASTBOT_TOOL/fastbot-thirdpart.jar sdcard/fastbot-thirdpart.jar
+adb -s $AVD_SERIAL shell mkdir data/local/tmp/arm64-v8a 
+adb -s $AVD_SERIAL shell mkdir data/local/tmp/armeabi-v7a  
+adb -s $AVD_SERIAL shell mkdir data/local/tmp/x86  
+adb -s $AVD_SERIAL shell mkdir data/local/tmp/x86_64
+
+echo "** Created folders for native libs on (${AVD_SERIAL})"
+adb -s $AVD_SERIAL push $FASTBOT_TOOL/libs/x86_64/libfastbot_native.so data/local/tmp/x86_64/libfastbot_native.so
+adb -s $AVD_SERIAL push $FASTBOT_TOOL/libs/x86/libfastbot_native.so data/local/tmp/x86/libfastbot_native.so
+adb -s $AVD_SERIAL push $FASTBOT_TOOL/libs/armeabi-v7a/libfastbot_native.so data/local/tmp/armeabi-v7a/libfastbot_native.so
+adb -s $AVD_SERIAL push $FASTBOT_TOOL/libs/arm64-v8a/libfastbot_native.so data/local/tmp/arm64-v8a/libfastbot_native.so
+adb -s $AVD_SERIAL push $FASTBOT_TOOL/framework.jar sdcard
+
+aapt2 dump strings $APK_FILE > max.valid.strings_${apk_file_name}
+adb -s $AVD_SERIAL push max.valid.strings_${apk_file_name} sdcard/max.valid.strings 
 
 echo "** INSTALL Fastbot (${AVD_SERIAL})"
 
 # get app package
-app_package_name=`aapt dump badging $APK_FILE | : | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
+app_package_name=`aapt dump badging $APK_FILE | grep package: | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
 echo "** PROCESSING APP (${AVD_SERIAL}): " $app_package_name
 
 # start logcat
@@ -108,7 +122,8 @@ bash dump_coverage.sh $AVD_SERIAL $app_package_name $result_dir &
 # run fastbot
 echo "** RUN FASTBOT (${AVD_SERIAL})"
 adb -s $AVD_SERIAL shell date "+%Y-%m-%d-%H:%M:%S" >> $result_dir/fastbot_testing_time_on_emulator.txt
-timeout $TEST_TIME adb -s $AVD_SERIAL shell CLASSPATH=/sdcard/monkeyq.jar:/sdcard/framework.jar exec app_process /system/bin com.android.commands.monkey.Monkey -p $app_package_name --agent robot --running-minutes 360  --throttle 200 -v -v --output-directory /sdcard/log --bugreport 1000000 2>&1 | tee $result_dir/fastbot.log 
+#timeout $TEST_TIME 
+adb -s $AVD_SERIAL shell CLASSPATH=/sdcard/monkeyq.jar:/sdcard/framework.jar:/sdcard/fastbot-thirdpart.jar exec app_process /system/bin com.android.commands.monkey.Monkey -p $app_package_name --agent robot --dyn-timeout --running-minutes 60  --throttle 200 -v -v --output-directory /sdcard/log --bugreport 1000000 2>&1 | tee $result_dir/fastbot.log 
 #timeout $TEST_TIME adb -s device_vendor_id shell CLASSPATH=/sdcard/monkeyq.jar:/sdcard/framework.jar exec app_process /system/bin com.android.commands.monkey.Monkey -p $app_package_name --agent robot --running-minutes duration(min) --throttle delay(ms) -v -v --output-directory /sdcard/xxx # folder for output directory --bugreport 1000000 2>&1 | tee $result_dir/fastbot.log # log printed when crash occurs 
 adb -s $AVD_SERIAL shell date "+%Y-%m-%d-%H:%M:%S" >> $result_dir/fastbot_testing_time_on_emulator.txt
 

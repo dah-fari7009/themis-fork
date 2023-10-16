@@ -1,1 +1,8 @@
 .DS_Store
+max.valid.strings*
+ape-results
+combodroid-results
+humanoid-results
+monkey-results
+qtesting-results
+fastbot-results

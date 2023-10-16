@@ -119,7 +119,7 @@ adb -s $AVD_SERIAL shell date "+%Y-%m-%d-%H:%M:%S" >> $result_dir/ape_testing_ti
 
 # pull Ape's results
 echo "** PULL APE RESULTS (${AVD_SERIAL})"
-adb -s $AVD_SERIAL pull /sdcard/sata-${app_package_name}-ape-sata-running-minutes-360 $result_dir/
+adb -s $AVD_SERIAL pull sdcard/sata-${app_package_name}-ape-sata-running-minutes-360 $result_dir/
 
 # stop coverage dumping
 echo "** STOP COVERAGE (${AVD_SERIAL})"
